@@ -11,16 +11,16 @@ export class EnumTypeFormatter implements SubTypeFormatter {
     }
     public getDefinition(type: EnumType): Definition {
         const members = uniqueArray(type.getMembers());
-        const type = typeName(members[0].value);
+        const enumType = typeName(members[0].value);
 
         // NOTE: We want to use "const" when referencing an enum member.
         // However, this formatter is used both for enum members and enum types,
         // so the side effect is that an enum type that contains just a single
         // value is represented as "const" too.
         return members.length === 1
-            ? { type: type, const: members[0].value }
+            ? { type: enumType, const: members[0].value }
             : {
-                  type: type,
+                  type: enumType,
                   oneOf: members.map((member) => {
                       return { title: member.name, const: member.value };
                   }),
