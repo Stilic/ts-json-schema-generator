@@ -2,7 +2,7 @@ import ts from "typescript";
 import { Context } from "../NodeParser";
 import { SubNodeParser } from "../SubNodeParser";
 import { BaseType } from "../Type/BaseType";
-import { EnumType, EnumValue } from "../Type/EnumType";
+import { EnumMember, EnumType, EnumValue } from "../Type/EnumType";
 import { isNodeHidden } from "../Utils/isHidden";
 import { getKey } from "../Utils/nodeKey";
 
@@ -13,13 +13,16 @@ export class EnumNodeParser implements SubNodeParser {
         return node.kind === ts.SyntaxKind.EnumDeclaration || node.kind === ts.SyntaxKind.EnumMember;
     }
     public createType(node: ts.EnumDeclaration | ts.EnumMember, context: Context): BaseType {
-        const members = node.kind === ts.SyntaxKind.EnumDeclaration ? node.members.slice() : [node];
-
         return new EnumType(
             `enum-${getKey(node, context)}`,
-            members
+            (node.kind === ts.SyntaxKind.EnumDeclaration ? node.members.slice() : [node])
                 .filter((member: ts.EnumMember) => !isNodeHidden(member))
-                .map((member, index) => this.getMemberValue(member, index))
+                .map((member, index) => {
+                    return {
+                        name: member.name.getText(),
+                        value: this.getMemberValue(member, index),
+                    } as EnumMember;
+                })
         );
     }
 
